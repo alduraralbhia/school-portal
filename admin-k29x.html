@@ -19,7 +19,7 @@ button{font:inherit;cursor:pointer}.btn{height:44px;border:0;border-radius:9px;b
 .tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}.tools input[type=search]{flex:1;min-width:200px}.tools label{display:flex;gap:6px;align-items:center}
 table{width:100%;border-collapse:collapse;font-size:.94rem}th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:right}th{background:#f5f8fb;color:var(--mut);font-size:.85rem}.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
 .due{color:var(--due);font-weight:800}.ok{color:var(--ok);font-weight:800}.scroll{overflow-x:auto}
-dialog{border:0;border-radius:14px;padding:24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:340px}dialog::backdrop{background:#0006}
+dialog{border:0;border-radius:14px;padding:24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:340px}dialog .btn{width:100%}dialog::backdrop{background:#0006}
 .code{font-size:2.2rem;font-weight:800;letter-spacing:.25em;direction:ltr;margin:10px 0}
 @media(max-width:640px){.stats{grid-template-columns:1fr 1fr}}
 </style></head><body>
@@ -32,32 +32,36 @@ dialog{border:0;border-radius:14px;padding:24px;text-align:center;box-shadow:0 2
 <div class="scroll"><table><thead><tr><th>ولي الأمر</th><th>الهاتف</th><th class="n">الرسوم</th><th class="n">المدفوع</th><th class="n">المتبقي</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
 <p id="upd" style="color:var(--mut);font-size:.85rem"></p></div>
 </section></main>
-<dialog id="dlg"><b id="dn"></b><div class="code" id="dc"></div><p style="color:var(--mut);font-size:.9rem;margin-top:0">سلّم هذا الرمز لولي الأمر. لا يمكن عرضه مرة أخرى، لكن يمكنك توليد رمز جديد.</p><button class="btn" onclick="dlg.close()">تم</button></dialog>
+<dialog id="dlg"><b id="dn"></b><div class="code" id="dc"></div><p style="color:var(--mut);font-size:.9rem;margin-top:0">سلّم هذا الرمز لولي الأمر. لا يمكن عرضه مرة أخرى، لكن يمكنك توليد رمز جديد.</p><button class="btn" id="wa" style="background:#1fae5b;margin-bottom:8px">إرسال عبر واتساب</button><button class="btn" style="background:#5d6d7e" onclick="dlg.close()">تم</button></dialog>
 <script>
 const CFG={url:'https://zkcvootlghmnrvrqmhmr.supabase.co',key:'sb_publishable_KECSSauUnf--sim1ecy9dg_o6dZZ_ct'};
 const sb=supabase.createClient(CFG.url,CFG.key),$=s=>document.querySelector(s),fmt=n=>Number(n||0).toLocaleString('en-US'),
 esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dig=s=>String(s??'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');
 const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
-let rows=[];
+let rows=[],SCH='',CUR=null;
 $('#login').onsubmit=async e=>{e.preventDefault();$('#lm').textContent='';const{error}=await sb.auth.signInWithPassword({email:$('#em').value,password:$('#pw').value});if(error)$('#lm').textContent='بيانات الدخول غير صحيحة';else init()};
 $('#out').onclick=async()=>{await sb.auth.signOut();location.reload()};
 async function init(){const{data:{session}}=await sb.auth.getSession();if(!session)return;$('#login').hidden=true;$('#app').hidden=false;$('#out').hidden=false;
-rows=[];for(let i=0;;i+=1000){const{data,error}=await sb.from('sp_families').select('*').range(i,i+999);if(error){alert('تعذر تحميل البيانات');return}rows.push(...data);if(data.length<1000)break}
-const{data:m}=await sb.from('sp_meta').select('*');const mm=Object.fromEntries((m||[]).map(r=>[r.key,r.value]));
+const seen=new Map();for(let i=0;;i+=1000){const{data,error}=await sb.from('sp_families').select('*').order('id').range(i,i+999);if(error){alert('تعذر تحميل البيانات');return}data.forEach(r=>seen.set(r.id,r));if(data.length<1000)break}rows=[...seen.values()];
+const{data:m}=await sb.from('sp_meta').select('*');const mm=Object.fromEntries((m||[]).map(r=>[r.key,r.value]));SCH=mm.school_name||'';
 $('#upd').textContent=mm.last_sync?'آخر تحديث للبيانات: '+new Date(mm.last_sync).toLocaleString('ar-LY'):'';
 const ys=[...new Set(rows.map(r=>r.year))].sort().reverse();$('#yr').innerHTML=ys.map(y=>`<option>${esc(y)}</option>`).join('');if(mm.current_year&&ys.includes(mm.current_year))$('#yr').value=mm.current_year;draw()}
 function draw(){const y=$('#yr').value,q=$('#q').value.trim().toLowerCase(),qd=dig(q);let all=rows.filter(r=>r.year===y);
 const T=all.reduce((a,r)=>({f:a.f+r.total_fees,p:a.p+r.paid}),{f:0,p:0});
 $('#stats').innerHTML=`<div><span>عدد العائلات</span><b>${all.length}</b></div><div><span>إجمالي الرسوم</span><b>${fmt(T.f)}</b></div><div><span>المقبوض</span><b class="ok">${fmt(T.p)}</b></div><div><span>المتبقي</span><b class="due">${fmt(Math.max(0,T.f-T.p))}</b></div>`;
 let v=all.filter(r=>(!q||r.name.toLowerCase().includes(q)||(qd&&dig(r.phone).includes(qd)))&&(!$('#od').checked||r.total_fees>r.paid)).sort((a,b)=>(b.total_fees-b.paid)-(a.total_fees-a.paid));
-$('#cnt').textContent=v.length+' نتيجة';
-$('#tb').innerHTML=v.slice(0,300).map(r=>{const d=r.total_fees-r.paid;return`<tr><td>${esc(r.name)}</td><td dir="ltr" style="text-align:right">${esc(r.phone)}</td><td class="n">${fmt(r.total_fees)}</td><td class="n">${fmt(r.paid)}</td><td class="n ${d>0?'due':'ok'}">${fmt(Math.max(0,d))}</td><td><button class="sm" data-k="${esc(dig(r.phone).slice(-9))}" data-n="${esc(r.name)}">رمز دخول</button></td></tr>`}).join('')||'<tr><td colspan="6" style="color:var(--mut);padding:16px">لا توجد نتائج.</td></tr>'}
+const dup=all.length-new Set(all.map(r=>r.name.trim())).size;$('#cnt').textContent=v.length+' نتيجة'+(dup?` — تنبيه: ${dup} اسم مكرر في هذه السنة`:'');
+$('#tb').innerHTML=v.slice(0,300).map(r=>{const d=r.total_fees-r.paid;return`<tr><td>${esc(r.name)}</td><td dir="ltr" style="text-align:right">${esc(r.phone)}</td><td class="n">${fmt(r.total_fees)}</td><td class="n">${fmt(r.paid)}</td><td class="n ${d>0?'due':'ok'}">${fmt(Math.max(0,d))}</td><td><button class="sm" data-k="${esc(dig(r.phone).slice(-9))}" data-n="${esc(r.name)}" data-p="${esc(r.phone)}">رمز دخول</button></td></tr>`}).join('')||'<tr><td colspan="6" style="color:var(--mut);padding:16px">لا توجد نتائج.</td></tr>'}
 ['#yr','#od'].forEach(s=>$(s).onchange=draw);$('#q').oninput=draw;
 $('#tb').onclick=async e=>{const b=e.target.closest('button[data-k]');if(!b)return;const k=b.dataset.k;if(k.length<7)return alert('رقم الهاتف غير صالح أو غير مسجل');
 if(!confirm('سيتم توليد رمز جديد لهذا الرقم وإلغاء الرمز القديم. متابعة؟'))return;
 const c=String(crypto.getRandomValues(new Uint32Array(1))[0]%1000000).padStart(6,'0');
 const{error}=await sb.from('sp_access_codes').upsert({phone_key:k,code_hash:await sha(`${k}:${c}`),created_at:new Date().toISOString()});
-if(error)return alert('تعذر حفظ الرمز');$('#dn').textContent=b.dataset.n;$('#dc').textContent=c;$('#dlg').showModal()};
+if(error)return alert('تعذر حفظ الرمز');CUR={p:b.dataset.p,c:c,n:b.dataset.n};$('#dn').textContent=b.dataset.n;$('#dc').textContent=c;$('#dlg').showModal()};
+const intl=p=>{let d=dig(p);if(d.startsWith('00'))d=d.slice(2);if(d.startsWith('218'))return d;if(d.startsWith('0'))return '218'+d.slice(1);return d.length===9?'218'+d:d};
+$('#wa').onclick=()=>{if(!CUR)return;const base=/^https?:/.test(location.href)?location.href.replace(/[^\/?#]*([?#].*)?$/,''):'';
+const msg='السلام عليكم '+CUR.n+'،\nرمز دخولك إلى بوابة أولياء الأمور'+(SCH?' ('+SCH+')':'')+' هو: '+CUR.c+(base?'\nرابط البوابة: '+base:'')+'\nاستخدم رقم هاتفك المسجّل لدى المدرسة مع هذا الرمز.';
+open('https://wa.me/'+intl(CUR.p)+'?text='+encodeURIComponent(msg),'_blank')};
 init();
 </script></body></html>
