@@ -85,11 +85,12 @@ sum:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',ok:'
 const ic=(k,s=20)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[k]}</svg>`;
 document.querySelectorAll('[data-i]').forEach(e=>e.innerHTML=ic(e.dataset.i,e.classList.contains('fab')?24:e.classList.contains('logo')?34:20));
 const $=s=>document.querySelector(s),fmt=n=>Number(n||0).toLocaleString('en-US'),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-if(CFG.whatsapp){$('#fwa').hidden=false;$('#fwa').href='https://wa.me/'+CFG.whatsapp.replace(/\D/g,'')}
-if(CFG.phone){$('#fcl').hidden=false;$('#fcl').href='tel:'+CFG.phone}
+function applyCfg(){const w=String(CFG.whatsapp||'').replace(/\D/g,'');$('#fwa').hidden=!w;if(w)$('#fwa').href='https://wa.me/'+w;$('#fcl').hidden=!CFG.phone;if(CFG.phone)$('#fcl').href='tel:'+CFG.phone}
+async function loadCfg(){try{const r=await fetch(CFG.url+'/rest/v1/sp_settings?select=key,value',{headers:{apikey:CFG.key}});if(r.ok)(await r.json()).forEach(x=>{if(x.value&&(x.key==='whatsapp'||x.key==='phone'))CFG[x.key]=x.value})}catch{}applyCfg()}
+applyCfg();const cfgP=loadCfg();
 $('#fpr').onclick=()=>print();$('#eye').onclick=()=>{const c=$('#cd');c.type=c.type==='password'?'text':'password'};
-$('#forgot').onclick=()=>{const p=$('#ph').value.trim(),i=$('#info');$('#err').hidden=true;
- if(CFG.whatsapp){open('https://wa.me/'+CFG.whatsapp.replace(/\D/g,'')+'?text='+encodeURIComponent('السلام عليكم، نسيت رمز الدخول إلى بوابة أولياء الأمور.'+(p?' رقم هاتفي: '+p:'')),'_blank')}
+$('#forgot').onclick=async()=>{await cfgP;const p=$('#ph').value.trim(),i=$('#info');$('#err').hidden=true;
+ if(CFG.whatsapp){location.href='https://wa.me/'+String(CFG.whatsapp).replace(/\D/g,'')+'?text='+encodeURIComponent('السلام عليكم، نسيت رمز الدخول إلى بوابة أولياء الأمور.'+(p?' رقم هاتفي المسجّل لديكم: '+p:''))}
  else{i.textContent='لإعادة إصدار الرمز تواصل مع إدارة المدرسة'+(CFG.phone?' على الرقم '+CFG.phone:'')+'، وسيصلك رمز جديد.';i.hidden=false}};
 let data;const K='sp_cred';
 async function login(auto){const b=$('#go'),er=$('#err');er.hidden=true;$('#info').hidden=true;b.disabled=true;b.classList.add('ld');

@@ -19,11 +19,11 @@ button{font:inherit;cursor:pointer}.btn{height:44px;border:0;border-radius:9px;b
 .tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}.tools input[type=search]{flex:1;min-width:200px}.tools label{display:flex;gap:6px;align-items:center}
 table{width:100%;border-collapse:collapse;font-size:.94rem}th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:right}th{background:#f5f8fb;color:var(--mut);font-size:.85rem}.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
 .due{color:var(--due);font-weight:800}.ok{color:var(--ok);font-weight:800}.scroll{overflow-x:auto}
-dialog{border:0;border-radius:14px;padding:24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:340px}dialog .btn{width:100%}dialog::backdrop{background:#0006}
+dialog{border:0;border-radius:14px;padding:24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:340px}dialog .btn{width:100%}#dcfg{text-align:right;max-width:380px}#dcfg label{display:block;font-weight:700;font-size:.9rem}#dcfg input{width:100%;margin:4px 0 12px;direction:ltr}#dcfg p{color:var(--mut);font-size:.85rem;margin:0 0 12px}dialog::backdrop{background:#0006}
 .code{font-size:2.2rem;font-weight:800;letter-spacing:.25em;direction:ltr;margin:10px 0}
 @media(max-width:640px){.stats{grid-template-columns:1fr 1fr}}
 </style></head><body>
-<header><h1>لوحة الإدارة — استعلام فقط</h1><button id="out" class="out" hidden>خروج</button></header>
+<header><h1>لوحة الإدارة — استعلام فقط</h1><span><button id="cfg" class="out" hidden>إعدادات المدرسة</button> <button id="out" class="out" hidden>خروج</button></span></header>
 <main>
 <form id="login" class="card"><h2>دخول المدير</h2><input id="em" type="email" placeholder="البريد الإلكتروني" required dir="ltr"><input id="pw" type="password" placeholder="كلمة المرور" required dir="ltr"><button class="btn">دخول</button><div id="lm" class="msg" role="alert"></div></form>
 <section id="app" hidden>
@@ -33,18 +33,21 @@ dialog{border:0;border-radius:14px;padding:24px;text-align:center;box-shadow:0 2
 <p id="upd" style="color:var(--mut);font-size:.85rem"></p></div>
 </section></main>
 <dialog id="dlg"><b id="dn"></b><div class="code" id="dc"></div><p style="color:var(--mut);font-size:.9rem;margin-top:0">سلّم هذا الرمز لولي الأمر. لا يمكن عرضه مرة أخرى، لكن يمكنك توليد رمز جديد.</p><button class="btn" id="wa" style="background:#1fae5b;margin-bottom:8px">إرسال عبر واتساب</button><button class="btn" style="background:#5d6d7e" onclick="dlg.close()">تم</button></dialog>
+<dialog id="dcfg"><b>إعدادات المدرسة</b><p>يستخدمها زر «نسيت الرمز؟» وأزرار التواصل في صفحة أولياء الأمور.</p>
+<label for="cw">رقم واتساب المدرسة</label><input id="cw" type="tel" placeholder="0912345678"><label for="cp">رقم اتصال المدرسة (اختياري)</label><input id="cp" type="tel" placeholder="0912345678">
+<button class="btn" id="csave" style="margin-bottom:8px">حفظ</button><button class="btn" style="background:#5d6d7e" onclick="dcfg.close()">إلغاء</button></dialog>
 <script>
 const CFG={url:'https://zkcvootlghmnrvrqmhmr.supabase.co',key:'sb_publishable_KECSSauUnf--sim1ecy9dg_o6dZZ_ct'};
 const sb=supabase.createClient(CFG.url,CFG.key),$=s=>document.querySelector(s),fmt=n=>Number(n||0).toLocaleString('en-US'),
 esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dig=s=>String(s??'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');
 const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
-let rows=[],SCH='',CUR=null;
+let rows=[],SCH='',CUR=null,SET={};
 $('#login').onsubmit=async e=>{e.preventDefault();$('#lm').textContent='';const{error}=await sb.auth.signInWithPassword({email:$('#em').value,password:$('#pw').value});if(error)$('#lm').textContent='بيانات الدخول غير صحيحة';else init()};
 $('#out').onclick=async()=>{await sb.auth.signOut();location.reload()};
-async function init(){const{data:{session}}=await sb.auth.getSession();if(!session)return;$('#login').hidden=true;$('#app').hidden=false;$('#out').hidden=false;
+async function init(){const{data:{session}}=await sb.auth.getSession();if(!session)return;$('#login').hidden=true;$('#app').hidden=false;$('#out').hidden=false;$('#cfg').hidden=false;
 const seen=new Map();for(let i=0;;i+=1000){const{data,error}=await sb.from('sp_families').select('*').order('id').range(i,i+999);if(error){alert('تعذر تحميل البيانات');return}data.forEach(r=>seen.set(r.id,r));if(data.length<1000)break}rows=[...seen.values()];
-const{data:m}=await sb.from('sp_meta').select('*');const mm=Object.fromEntries((m||[]).map(r=>[r.key,r.value]));SCH=mm.school_name||'';
+const{data:m}=await sb.from('sp_meta').select('*');const mm=Object.fromEntries((m||[]).map(r=>[r.key,r.value]));SCH=mm.school_name||'';{const{data:st}=await sb.from('sp_settings').select('*');SET=Object.fromEntries((st||[]).map(r=>[r.key,r.value]))}
 $('#upd').textContent=mm.last_sync?'آخر تحديث للبيانات: '+new Date(mm.last_sync).toLocaleString('ar-LY'):'';
 const ys=[...new Set(rows.map(r=>r.year))].sort().reverse();$('#yr').innerHTML=ys.map(y=>`<option>${esc(y)}</option>`).join('');if(mm.current_year&&ys.includes(mm.current_year))$('#yr').value=mm.current_year;draw()}
 function draw(){const y=$('#yr').value,q=$('#q').value.trim().toLowerCase(),qd=dig(q);let all=rows.filter(r=>r.year===y);
@@ -63,5 +66,9 @@ const intl=p=>{let d=dig(p);if(d.startsWith('00'))d=d.slice(2);if(d.startsWith('
 $('#wa').onclick=()=>{if(!CUR)return;const base=/^https?:/.test(location.href)?location.href.replace(/[^\/?#]*([?#].*)?$/,''):'';
 const msg='السلام عليكم '+CUR.n+'،\nرمز دخولك إلى بوابة أولياء الأمور'+(SCH?' ('+SCH+')':'')+' هو: '+CUR.c+(base?'\nرابط البوابة: '+base:'')+'\nاستخدم رقم هاتفك المسجّل لدى المدرسة مع هذا الرمز.';
 open('https://wa.me/'+intl(CUR.p)+'?text='+encodeURIComponent(msg),'_blank')};
+$('#cfg').onclick=()=>{$('#cw').value=SET.whatsapp||'';$('#cp').value=SET.phone||'';$('#dcfg').showModal()};
+$('#csave').onclick=async()=>{const w=intl($('#cw').value),ph=dig($('#cp').value)?'+'+intl($('#cp').value):'';
+const{error}=await sb.from('sp_settings').upsert([{key:'whatsapp',value:w},{key:'phone',value:ph}]);
+if(error)return alert('تعذر الحفظ. تأكد من تشغيل ملف SQL الخاص بالإعدادات.');SET={whatsapp:w,phone:ph};$('#dcfg').close();alert('تم حفظ الإعدادات')};
 init();
 </script></body></html>
