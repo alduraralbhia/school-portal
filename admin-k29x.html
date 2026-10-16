@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>لوحة الإدارة — استعلام فقط</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--ink:#14283d;--mut:#5d6d7e;--line:#dbe3ec;--bg:#edf1f5;--brand:#0f6b63;--brand-d:#0a4f49;--due:#a8480a;--ok:#13763b}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;font-family:Tajawal,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+header{background:var(--brand-d);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px}header h1{margin:0;font-size:1.15rem}
+main{max-width:1000px;margin:18px auto;padding:0 14px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 6px 24px rgba(20,40,61,.07)}
+input,select{height:44px;border:1.5px solid var(--line);border-radius:9px;padding:0 12px;font:inherit;background:#f9fbfd}input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px rgba(15,107,99,.14)}
+button{font:inherit;cursor:pointer}.btn{height:44px;border:0;border-radius:9px;background:var(--brand);color:#fff;font-weight:800;padding:0 18px}.btn:hover{background:var(--brand-d)}
+.sm{height:34px;padding:0 12px;border:1.5px solid var(--brand);background:#fff;color:var(--brand);border-radius:8px;font-weight:700}.sm:hover{background:#eaf5f3}
+.out{background:transparent;border:1px solid #ffffff88;color:#fff;border-radius:8px;height:36px;padding:0 14px}
+#login{max-width:400px;margin:60px auto;display:grid;gap:12px}#login h2{margin:0}
+.msg{color:#b3261e;font-weight:500}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.stats div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}.stats span{color:var(--mut);font-size:.85rem;display:block}.stats b{font-size:1.35rem}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}.tools input[type=search]{flex:1;min-width:200px}.tools label{display:flex;gap:6px;align-items:center}
+table{width:100%;border-collapse:collapse;font-size:.94rem}th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:right}th{background:#f5f8fb;color:var(--mut);font-size:.85rem}.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+.due{color:var(--due);font-weight:800}.ok{color:var(--ok);font-weight:800}.scroll{overflow-x:auto}
+dialog{border:0;border-radius:14px;padding:24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:340px}dialog::backdrop{background:#0006}
+.code{font-size:2.2rem;font-weight:800;letter-spacing:.25em;direction:ltr;margin:10px 0}
+@media(max-width:640px){.stats{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<header><h1>لوحة الإدارة — استعلام فقط</h1><button id="out" class="out" hidden>خروج</button></header>
+<main>
+<form id="login" class="card"><h2>دخول المدير</h2><input id="em" type="email" placeholder="البريد الإلكتروني" required dir="ltr"><input id="pw" type="password" placeholder="كلمة المرور" required dir="ltr"><button class="btn">دخول</button><div id="lm" class="msg" role="alert"></div></form>
+<section id="app" hidden>
+<div class="stats" id="stats"></div>
+<div class="card"><div class="tools"><select id="yr" aria-label="السنة"></select><input id="q" type="search" placeholder="ابحث بالاسم أو الهاتف"><label><input id="od" type="checkbox"> المتأخرون فقط</label><span id="cnt" style="color:var(--mut)"></span></div>
+<div class="scroll"><table><thead><tr><th>ولي الأمر</th><th>الهاتف</th><th class="n">الرسوم</th><th class="n">المدفوع</th><th class="n">المتبقي</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
+<p id="upd" style="color:var(--mut);font-size:.85rem"></p></div>
+</section></main>
+<dialog id="dlg"><b id="dn"></b><div class="code" id="dc"></div><p style="color:var(--mut);font-size:.9rem;margin-top:0">سلّم هذا الرمز لولي الأمر. لا يمكن عرضه مرة أخرى، لكن يمكنك توليد رمز جديد.</p><button class="btn" onclick="dlg.close()">تم</button></dialog>
+<script>
+const CFG={url:'https://zkcvootlghmnrvrqmhmr.supabase.co',key:'sb_publishable_KECSSauUnf--sim1ecy9dg_o6dZZ_ct'};
+const sb=supabase.createClient(CFG.url,CFG.key),$=s=>document.querySelector(s),fmt=n=>Number(n||0).toLocaleString('en-US'),
+esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dig=s=>String(s??'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');
+const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+let rows=[];
+$('#login').onsubmit=async e=>{e.preventDefault();$('#lm').textContent='';const{error}=await sb.auth.signInWithPassword({email:$('#em').value,password:$('#pw').value});if(error)$('#lm').textContent='بيانات الدخول غير صحيحة';else init()};
+$('#out').onclick=async()=>{await sb.auth.signOut();location.reload()};
+async function init(){const{data:{session}}=await sb.auth.getSession();if(!session)return;$('#login').hidden=true;$('#app').hidden=false;$('#out').hidden=false;
+rows=[];for(let i=0;;i+=1000){const{data,error}=await sb.from('sp_families').select('*').range(i,i+999);if(error){alert('تعذر تحميل البيانات');return}rows.push(...data);if(data.length<1000)break}
+const{data:m}=await sb.from('sp_meta').select('*');const mm=Object.fromEntries((m||[]).map(r=>[r.key,r.value]));
+$('#upd').textContent=mm.last_sync?'آخر تحديث للبيانات: '+new Date(mm.last_sync).toLocaleString('ar-LY'):'';
+const ys=[...new Set(rows.map(r=>r.year))].sort().reverse();$('#yr').innerHTML=ys.map(y=>`<option>${esc(y)}</option>`).join('');if(mm.current_year&&ys.includes(mm.current_year))$('#yr').value=mm.current_year;draw()}
+function draw(){const y=$('#yr').value,q=$('#q').value.trim().toLowerCase(),qd=dig(q);let all=rows.filter(r=>r.year===y);
+const T=all.reduce((a,r)=>({f:a.f+r.total_fees,p:a.p+r.paid}),{f:0,p:0});
+$('#stats').innerHTML=`<div><span>عدد العائلات</span><b>${all.length}</b></div><div><span>إجمالي الرسوم</span><b>${fmt(T.f)}</b></div><div><span>المقبوض</span><b class="ok">${fmt(T.p)}</b></div><div><span>المتبقي</span><b class="due">${fmt(Math.max(0,T.f-T.p))}</b></div>`;
+let v=all.filter(r=>(!q||r.name.toLowerCase().includes(q)||(qd&&dig(r.phone).includes(qd)))&&(!$('#od').checked||r.total_fees>r.paid)).sort((a,b)=>(b.total_fees-b.paid)-(a.total_fees-a.paid));
+$('#cnt').textContent=v.length+' نتيجة';
+$('#tb').innerHTML=v.slice(0,300).map(r=>{const d=r.total_fees-r.paid;return`<tr><td>${esc(r.name)}</td><td dir="ltr" style="text-align:right">${esc(r.phone)}</td><td class="n">${fmt(r.total_fees)}</td><td class="n">${fmt(r.paid)}</td><td class="n ${d>0?'due':'ok'}">${fmt(Math.max(0,d))}</td><td><button class="sm" data-k="${esc(dig(r.phone).slice(-9))}" data-n="${esc(r.name)}">رمز دخول</button></td></tr>`}).join('')||'<tr><td colspan="6" style="color:var(--mut);padding:16px">لا توجد نتائج.</td></tr>'}
+['#yr','#od'].forEach(s=>$(s).onchange=draw);$('#q').oninput=draw;
+$('#tb').onclick=async e=>{const b=e.target.closest('button[data-k]');if(!b)return;const k=b.dataset.k;if(k.length<7)return alert('رقم الهاتف غير صالح أو غير مسجل');
+if(!confirm('سيتم توليد رمز جديد لهذا الرقم وإلغاء الرمز القديم. متابعة؟'))return;
+const c=String(crypto.getRandomValues(new Uint32Array(1))[0]%1000000).padStart(6,'0');
+const{error}=await sb.from('sp_access_codes').upsert({phone_key:k,code_hash:await sha(`${k}:${c}`),created_at:new Date().toISOString()});
+if(error)return alert('تعذر حفظ الرمز');$('#dn').textContent=b.dataset.n;$('#dc').textContent=c;$('#dlg').showModal()};
+init();
+</script></body></html>

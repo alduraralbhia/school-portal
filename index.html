@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>بوابة أولياء الأمور — كشف الحساب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14283d;--mut:#5d6d7e;--line:#dbe3ec;--bg:#edf1f5;--card:#fff;--brand:#0f6b63;--brand-d:#0a4f49;--due:#a8480a;--ok:#13763b;--err:#b3261e}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;font-family:Tajawal,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.7;min-height:100vh}
+.top{background:var(--brand-d);color:#fff;padding:22px 16px 64px;text-align:center}
+.top h1{margin:0;font-size:1.45rem;font-weight:800}.top p{margin:2px 0 0;opacity:.8;font-size:.95rem}
+.wrap{max-width:760px;margin:-44px auto 40px;padding:0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 6px 24px rgba(20,40,61,.07)}
+#login{max-width:430px;margin:0 auto}
+#login h2{margin:0 0 4px;font-size:1.2rem}#login .sub{margin:0 0 18px;color:var(--mut);font-size:.93rem}
+.field{margin-bottom:14px}.field label{display:block;font-weight:700;font-size:.92rem;margin-bottom:6px}
+.field input{width:100%;height:50px;border:1.5px solid var(--line);border-radius:10px;padding:0 14px;font:inherit;font-size:1.05rem;background:#f9fbfd;color:var(--ink);transition:border-color .15s,box-shadow .15s}
+.field input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px rgba(15,107,99,.14);background:#fff}
+.field input.num{direction:ltr;text-align:center;letter-spacing:.18em;font-weight:700}
+.field small{display:block;margin-top:5px;color:var(--mut);font-size:.82rem}
+.btn{width:100%;height:52px;border:0;border-radius:10px;background:var(--brand);color:#fff;font:inherit;font-weight:800;font-size:1.05rem;cursor:pointer;position:relative}
+.btn:hover{background:var(--brand-d)}.btn:focus-visible,.link:focus-visible,select:focus-visible{outline:3px solid #7cc4bc;outline-offset:2px}
+.btn:disabled{opacity:.75;cursor:wait}.btn.ld::after{content:"";position:absolute;inset-inline-start:18px;top:16px;width:18px;height:18px;border:3px solid #ffffff66;border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.btn.ld::after{animation-duration:2s}}
+.err{background:#fdecea;border:1px solid #f4b8b3;color:var(--err);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-weight:500;font-size:.95rem}
+.bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+.bar select{height:42px;border:1.5px solid var(--line);border-radius:9px;padding:0 10px;font:inherit;background:#fff;max-width:100%}
+.link{background:none;border:0;color:var(--brand);font:inherit;font-weight:700;cursor:pointer;padding:6px 4px}
+.upd{color:var(--mut);font-size:.85rem;margin:0 0 14px}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 14px}
+.sum div{background:#f5f8fb;border:1px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center}
+.sum span{display:block;color:var(--mut);font-size:.85rem}.sum b{font-size:1.45rem;font-weight:800}
+.sum .paid b{color:var(--ok)}.sum .due{background:#fff6ee;border-color:#f0cfae}.sum .due b{color:var(--due)}.sum .done{background:#eefaf2;border-color:#bfe3cb}.sum .done b{color:var(--ok)}
+.prog{height:10px;background:#e3eaf1;border-radius:99px;overflow:hidden}.prog i{display:block;height:100%;background:var(--brand)}
+.pl{display:flex;justify-content:space-between;color:var(--mut);font-size:.85rem;margin:6px 0 4px}
+.note{background:#eef6fb;border:1px solid #cfe2f1;border-radius:10px;padding:9px 12px;margin-top:12px;font-size:.9rem}
+h3{margin:24px 0 8px;font-size:1.05rem}
+table{width:100%;border-collapse:collapse;font-size:.95rem}th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:right}th{color:var(--mut);font-weight:700;font-size:.85rem;background:#f5f8fb}
+td.n,th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}tfoot td{font-weight:800;border-bottom:0}
+.empty{color:var(--mut);padding:14px 4px}.scroll{overflow-x:auto}
+footer{text-align:center;color:var(--mut);font-size:.8rem;margin-top:18px}
+@media(max-width:480px){.sum{grid-template-columns:1fr}.sum div{display:flex;justify-content:space-between;align-items:center;text-align:right}.sum b{font-size:1.25rem}.card{padding:16px}}
+@media print{.top{background:none;color:#000;padding:0 0 10px}.wrap{margin:0}.card{box-shadow:none}.noprint{display:none!important}}
+</style></head><body>
+<header class="top"><h1 id="school">بوابة أولياء الأمور</h1><p>الاستعلام عن الرسوم الدراسية والمدفوعات</p></header>
+<main class="wrap">
+<section id="login" class="card"><h2>تسجيل الدخول</h2><p class="sub">أدخل رقم الهاتف المسجّل لدى المدرسة والرمز الذي استلمته من الإدارة.</p>
+<form id="f" autocomplete="off" novalidate>
+<div id="err" class="err" role="alert" hidden></div>
+<div class="field"><label for="ph">رقم الهاتف</label><input id="ph" class="num" type="tel" inputmode="tel" placeholder="09XXXXXXXX" required></div>
+<div class="field"><label for="cd">رمز الدخول</label><input id="cd" class="num" type="password" inputmode="numeric" maxlength="8" placeholder="••••••" required><small>الرمز مكوّن من أرقام فقط، ويُسلَّم لك من إدارة المدرسة.</small></div>
+<button id="go" class="btn" type="submit">عرض كشف الحساب</button></form></section>
+
+<section id="res" hidden>
+<div class="card">
+<div class="bar noprint"><select id="fam" aria-label="اختر السنة الدراسية"></select><span><button class="link" onclick="window.print()">طباعة الكشف</button><button class="link" onclick="location.reload()">خروج</button></span></div>
+<h2 id="fname" style="margin:0 0 2px"></h2><p id="upd" class="upd"></p>
+<div id="sum" class="sum"></div>
+<div class="pl"><span>نسبة السداد</span><b id="pct"></b></div><div class="prog" role="progressbar" aria-label="نسبة السداد"><i id="pbar"></i></div>
+<div id="disc" class="note" hidden></div>
+<h3>الطلاب</h3><div class="scroll"><table><thead><tr><th>الاسم</th><th>الصف</th><th class="n">الرسوم (د.ل)</th></tr></thead><tbody id="st"></tbody></table></div>
+<h3>سندات القبض</h3><div class="scroll"><table><thead><tr><th>التاريخ</th><th>طريقة الدفع</th><th>المرجع</th><th class="n">المبلغ (د.ل)</th></tr></thead><tbody id="rc"></tbody><tfoot id="rf"></tfoot></table></div>
+</div>
+<footer>هذا الكشف للاطلاع فقط. عند وجود أي اختلاف يرجى مراجعة إدارة المدرسة.</footer>
+</section></main>
+<script>
+const CFG={url:'https://zkcvootlghmnrvrqmhmr.supabase.co',key:'sb_publishable_KECSSauUnf--sim1ecy9dg_o6dZZ_ct'};
+const $=s=>document.querySelector(s),fmt=n=>Number(n||0).toLocaleString('en-US'),
+esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let data;
+$('#f').addEventListener('submit',async e=>{e.preventDefault();const b=$('#go'),er=$('#err');er.hidden=true;b.disabled=true;b.classList.add('ld');
+try{const r=await fetch(CFG.url+'/functions/v1/lookup',{method:'POST',headers:{'Content-Type':'application/json',apikey:CFG.key,Authorization:'Bearer '+CFG.key},body:JSON.stringify({phone:$('#ph').value,code:$('#cd').value})});
+const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'تعذر الاتصال بالخادم، حاول لاحقًا');
+if(!j.families?.length)throw new Error('لا توجد بيانات مسجلة لهذا الرقم');data=j;show()}
+catch(x){er.textContent=x.message;er.hidden=false}finally{b.disabled=false;b.classList.remove('ld')}});
+function show(){$('#login').hidden=true;$('#res').hidden=false;$('#school').textContent=data.school||'بوابة أولياء الأمور';document.title=($('#school').textContent)+' — كشف الحساب';
+$('#fam').innerHTML=data.families.map((f,i)=>`<option value="${i}">العام الدراسي ${esc(f.year)}</option>`).join('');
+$('#fam').hidden=data.families.length<2;$('#fam').onchange=()=>draw(+$('#fam').value);draw(0)}
+function draw(i){const f=data.families[i],rem=f.total_fees-f.paid,p=f.total_fees?Math.max(0,Math.min(100,Math.round(f.paid/f.total_fees*100))):0;
+$('#fname').textContent='ولي الأمر: '+f.name;
+$('#upd').textContent=data.updated_at?'آخر تحديث للبيانات: '+new Date(data.updated_at).toLocaleString('ar-LY'):'';
+$('#sum').innerHTML=`<div><span>إجمالي الرسوم</span><b>${fmt(f.total_fees)}</b></div><div class="paid"><span>المدفوع</span><b>${fmt(f.paid)}</b></div><div class="${rem>0?'due':'done'}"><span>${rem>0?'المتبقي':'الحساب مسدَّد'}</span><b>${fmt(Math.max(0,rem))}</b></div>`;
+$('#pct').textContent=p+'%';$('#pbar').style.width=p+'%';
+const d=$('#disc');d.hidden=!(f.discount_type&&f.discount_type!=='none'&&f.discount_value>0);if(!d.hidden)d.textContent='تم احتساب خصم على الرسوم'+(f.discount_reason?' ('+f.discount_reason+')':'')+'.';
+$('#st').innerHTML=f.students.length?f.students.map(s=>`<tr><td>${esc(s.name)}</td><td>${esc(s.grade)}</td><td class="n">${fmt(s.price)}</td></tr>`).join(''):'<tr><td colspan="3" class="empty">لا يوجد طلاب مسجلون.</td></tr>';
+$('#rc').innerHTML=f.receipts.length?f.receipts.map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(r.method||'—')}</td><td>${esc(r.ref&&r.ref!=='-'?r.ref:'—')}</td><td class="n">${fmt(r.amount)}</td></tr>`).join(''):'<tr><td colspan="4" class="empty">لا توجد دفعات مسجلة بعد.</td></tr>';
+$('#rf').innerHTML=f.receipts.length?`<tr><td colspan="3">إجمالي المدفوع</td><td class="n">${fmt(f.receipts.reduce((a,r)=>a+Number(r.amount),0))}</td></tr>`:''}
+</script></body></html>
