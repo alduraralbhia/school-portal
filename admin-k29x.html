@@ -22,8 +22,26 @@ table{width:100%;border-collapse:collapse;font-size:.94rem}th,td{padding:9px 8px
 dialog{border:0;border-radius:14px;padding:24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:340px}dialog .btn{width:100%}#dcfg{text-align:right;max-width:380px}#dcfg label{display:block;font-weight:700;font-size:.9rem}#dcfg input{width:100%;margin:4px 0 12px;direction:ltr}#dcfg p{color:var(--mut);font-size:.85rem;margin:0 0 12px}dialog::backdrop{background:#0006}
 .code{font-size:2.2rem;font-weight:800;letter-spacing:.25em;direction:ltr;margin:10px 0}
 @media(max-width:640px){.stats{grid-template-columns:1fr 1fr}}
+/* glass theme */
+:root{--gl:rgba(255,255,255,.58);--gb:rgba(255,255,255,.8);--gs:0 12px 40px rgba(15,60,70,.12),inset 0 1px 0 rgba(255,255,255,.85);--line:rgba(15,107,99,.14)}
+body{background:#e9f2f1}
+body::before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(60vmax 50vmax at 88% -8%,rgba(23,148,138,.4),transparent 62%),radial-gradient(52vmax 45vmax at -8% 35%,rgba(224,176,74,.3),transparent 62%),radial-gradient(50vmax 45vmax at 75% 108%,rgba(44,82,130,.26),transparent 62%),linear-gradient(180deg,#eaf4f2,#eef2f8)}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(rgba(10,79,73,.17) 1px,transparent 1.3px) 0 0/22px 22px;-webkit-mask-image:linear-gradient(#000,transparent 75%);mask-image:linear-gradient(#000,transparent 75%)}
+header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.55);backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);border-bottom:1px solid rgba(255,255,255,.8);box-shadow:0 4px 24px rgba(15,60,70,.08);color:var(--brand-d)}
+.brand{display:flex;align-items:center;gap:10px}.hl,.lgp{background:#fff;display:grid;place-items:center;overflow:hidden}.hl{width:40px;height:40px;border-radius:12px;padding:4px;box-shadow:0 4px 12px rgba(15,107,99,.18)}.hl img,.lgp img{width:100%;height:100%;object-fit:contain}
+.card,.stats div{background:var(--gl);backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);border:1px solid var(--gb);border-radius:20px;box-shadow:var(--gs)}
+input,select{background:rgba(255,255,255,.72);border-radius:12px}input:focus,select:focus{background:#fff}
+.btn{border-radius:14px;background:linear-gradient(180deg,#16897f,#0b5a53);box-shadow:0 10px 24px rgba(15,107,99,.34),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -2px 0 rgba(0,0,0,.12);transition:transform .15s,box-shadow .15s,filter .15s}
+.btn:hover{filter:brightness(1.07);box-shadow:0 14px 28px rgba(15,107,99,.4),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -2px 0 rgba(0,0,0,.12)}.btn:active{transform:translateY(1px);box-shadow:0 4px 10px rgba(15,107,99,.3),inset 0 2px 4px rgba(0,0,0,.15)}
+.btn.wa{background:linear-gradient(180deg,#2bc66f,#159349)}.btn.gy{background:linear-gradient(180deg,#6b7b8b,#4d5b69)}
+.sm{border-radius:99px;background:rgba(255,255,255,.7);transition:background .15s}.sm:hover{background:#fff}.sm:disabled{opacity:.45;cursor:default}
+.out{color:var(--brand-d);background:rgba(255,255,255,.65);border:1px solid var(--line);border-radius:99px}.out:hover{background:#fff}
+th{background:rgba(15,107,99,.07)}tbody tr:hover{background:rgba(255,255,255,.5)}
+dialog{background:rgba(255,255,255,.84);backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);border:1px solid #fff;border-radius:22px}dialog::backdrop{background:rgba(10,40,45,.35);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+#dcfg{max-width:420px}.lg{display:flex;align-items:center;gap:12px;margin:4px 0 12px}.lgp{width:72px;height:72px;border-radius:20px;border:1px dashed var(--line);padding:6px;color:var(--mut);font-size:.75rem;flex:none}.lga{display:grid;gap:6px}
+@supports not (backdrop-filter:blur(1px)){.card,.stats div,dialog,header{background:rgba(255,255,255,.94)}}
 </style></head><body>
-<header><h1>لوحة الإدارة — استعلام فقط</h1><span><button id="cfg" class="out" hidden>إعدادات المدرسة</button> <button id="out" class="out" hidden>خروج</button></span></header>
+<header><div class="brand"><span id="hl" class="hl" hidden></span><h1>لوحة الإدارة — استعلام فقط</h1></div><span><button id="cfg" class="out" hidden>إعدادات المدرسة</button> <button id="out" class="out" hidden>خروج</button></span></header>
 <main>
 <form id="login" class="card"><h2>دخول المدير</h2><input id="em" type="email" placeholder="البريد الإلكتروني" required dir="ltr"><input id="pw" type="password" placeholder="كلمة المرور" required dir="ltr"><button class="btn">دخول</button><div id="lm" class="msg" role="alert"></div></form>
 <section id="app" hidden>
@@ -32,22 +50,30 @@ dialog{border:0;border-radius:14px;padding:24px;text-align:center;box-shadow:0 2
 <div class="scroll"><table><thead><tr><th>ولي الأمر</th><th>الهاتف</th><th class="n">الرسوم</th><th class="n">المدفوع</th><th class="n">المتبقي</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>
 <p id="upd" style="color:var(--mut);font-size:.85rem"></p></div>
 </section></main>
-<dialog id="dlg"><b id="dn"></b><div class="code" id="dc"></div><p style="color:var(--mut);font-size:.9rem;margin-top:0">سلّم هذا الرمز لولي الأمر. لا يمكن عرضه مرة أخرى، لكن يمكنك توليد رمز جديد.</p><button class="btn" id="wa" style="background:#1fae5b;margin-bottom:8px">إرسال عبر واتساب</button><button class="btn" style="background:#5d6d7e" onclick="dlg.close()">تم</button></dialog>
+<dialog id="dlg"><b id="dn"></b><div class="code" id="dc"></div><p style="color:var(--mut);font-size:.9rem;margin-top:0">سلّم هذا الرمز لولي الأمر. لا يمكن عرضه مرة أخرى، لكن يمكنك توليد رمز جديد.</p><button class="btn wa" id="wa" style="margin-bottom:8px">إرسال عبر واتساب</button><button class="btn gy" onclick="dlg.close()">تم</button></dialog>
 <dialog id="dcfg"><b>إعدادات المدرسة</b><p>يستخدمها زر «نسيت الرمز؟» وأزرار التواصل في صفحة أولياء الأمور.</p>
+<label>شعار المدرسة</label><div class="lg"><div class="lgp" id="lgp"></div><div class="lga"><button type="button" class="sm" id="lgb">اختيار صورة</button><button type="button" class="sm" id="lgr">إزالة</button></div></div><input id="lgf" type="file" accept="image/*" hidden>
+<label for="lgu">أو رابط صورة الشعار</label><input id="lgu" type="url" placeholder="https://example.com/logo.png">
 <label for="cw">رقم واتساب المدرسة</label><input id="cw" type="tel" placeholder="0912345678"><label for="cp">رقم اتصال المدرسة (اختياري)</label><input id="cp" type="tel" placeholder="0912345678">
-<button class="btn" id="csave" style="margin-bottom:8px">حفظ</button><button class="btn" style="background:#5d6d7e" onclick="dcfg.close()">إلغاء</button></dialog>
+<button class="btn" id="csave" style="margin-bottom:8px">حفظ</button><button class="btn gy" onclick="dcfg.close()">إلغاء</button></dialog>
 <script>
 const CFG={url:'https://zkcvootlghmnrvrqmhmr.supabase.co',key:'sb_publishable_KECSSauUnf--sim1ecy9dg_o6dZZ_ct'};
 const sb=supabase.createClient(CFG.url,CFG.key),$=s=>document.querySelector(s),fmt=n=>Number(n||0).toLocaleString('en-US'),
 esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dig=s=>String(s??'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');
 const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join('');
-let rows=[],SCH='',CUR=null,SET={};
+let rows=[],SCH='',CUR=null,SET={},LOGO='';
+function okLogo(u){return /^(data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,[A-Za-z0-9+\/=]+|https:\/\/[^\s"'<>]+)$/i.test(u||'')}
+function putLogo(el,u){el.textContent='';if(okLogo(u)){const i=new Image();i.alt='';i.src=u;el.appendChild(i);return true}return false}
+function hdrLogo(){$('#hl').hidden=!putLogo($('#hl'),SET.logo)}
+function prevLogo(){if(!putLogo($('#lgp'),LOGO))$('#lgp').textContent='بدون شعار';$('#lgr').disabled=!LOGO}
+async function shrink(f){const u=URL.createObjectURL(f);try{const im=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=u});for(const m of[384,256,160]){const w=im.naturalWidth||m,h=im.naturalHeight||m,k=Math.min(1,m/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);const d=c.toDataURL('image/png');if(d.length<300000)return d}throw 0}finally{URL.revokeObjectURL(u)}}
+(async()=>{try{const{data}=await sb.from('sp_settings').select('*');const l=(data||[]).find(r=>r.key==='logo');if(l){SET.logo=l.value;hdrLogo()}}catch{}})();
 $('#login').onsubmit=async e=>{e.preventDefault();$('#lm').textContent='';const{error}=await sb.auth.signInWithPassword({email:$('#em').value,password:$('#pw').value});if(error)$('#lm').textContent='بيانات الدخول غير صحيحة';else init()};
 $('#out').onclick=async()=>{await sb.auth.signOut();location.reload()};
 async function init(){const{data:{session}}=await sb.auth.getSession();if(!session)return;$('#login').hidden=true;$('#app').hidden=false;$('#out').hidden=false;$('#cfg').hidden=false;
 const seen=new Map();for(let i=0;;i+=1000){const{data,error}=await sb.from('sp_families').select('*').order('id').range(i,i+999);if(error){alert('تعذر تحميل البيانات');return}data.forEach(r=>seen.set(r.id,r));if(data.length<1000)break}rows=[...seen.values()];
-const{data:m}=await sb.from('sp_meta').select('*');const mm=Object.fromEntries((m||[]).map(r=>[r.key,r.value]));SCH=mm.school_name||'';{const{data:st}=await sb.from('sp_settings').select('*');SET=Object.fromEntries((st||[]).map(r=>[r.key,r.value]))}
+const{data:m}=await sb.from('sp_meta').select('*');const mm=Object.fromEntries((m||[]).map(r=>[r.key,r.value]));SCH=mm.school_name||'';{const{data:st}=await sb.from('sp_settings').select('*');SET=Object.fromEntries((st||[]).map(r=>[r.key,r.value]));hdrLogo()}
 $('#upd').textContent=mm.last_sync?'آخر تحديث للبيانات: '+new Date(mm.last_sync).toLocaleString('ar-LY'):'';
 const ys=[...new Set(rows.map(r=>r.year))].sort().reverse();$('#yr').innerHTML=ys.map(y=>`<option>${esc(y)}</option>`).join('');if(mm.current_year&&ys.includes(mm.current_year))$('#yr').value=mm.current_year;draw()}
 function draw(){const y=$('#yr').value,q=$('#q').value.trim().toLowerCase(),qd=dig(q);let all=rows.filter(r=>r.year===y);
@@ -66,9 +92,13 @@ const intl=p=>{let d=dig(p);if(d.startsWith('00'))d=d.slice(2);if(d.startsWith('
 $('#wa').onclick=()=>{if(!CUR)return;const base=/^https?:/.test(location.href)?location.href.replace(/[^\/?#]*([?#].*)?$/,''):'';
 const msg='السلام عليكم '+CUR.n+'،\nرمز دخولك إلى بوابة أولياء الأمور'+(SCH?' ('+SCH+')':'')+' هو: '+CUR.c+(base?'\nرابط البوابة: '+base:'')+'\nاستخدم رقم هاتفك المسجّل لدى المدرسة مع هذا الرمز.';
 open('https://wa.me/'+intl(CUR.p)+'?text='+encodeURIComponent(msg),'_blank')};
-$('#cfg').onclick=()=>{$('#cw').value=SET.whatsapp||'';$('#cp').value=SET.phone||'';$('#dcfg').showModal()};
+$('#lgb').onclick=()=>$('#lgf').click();
+$('#lgr').onclick=()=>{LOGO='';$('#lgu').value='';prevLogo()};
+$('#lgu').oninput=e=>{const v=e.target.value.trim();if(/^https:/i.test(v)&&okLogo(v)){LOGO=v;prevLogo()}};
+$('#lgf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(!/^image\//.test(f.type))return alert('الملف المختار ليس صورة');try{LOGO=await shrink(f);$('#lgu').value='';prevLogo()}catch{alert('تعذر قراءة الصورة')}};
+$('#cfg').onclick=()=>{LOGO=okLogo(SET.logo)?SET.logo:'';$('#lgu').value=/^https:/i.test(LOGO)?LOGO:'';prevLogo();$('#cw').value=SET.whatsapp||'';$('#cp').value=SET.phone||'';$('#dcfg').showModal()};
 $('#csave').onclick=async()=>{const w=intl($('#cw').value),ph=dig($('#cp').value)?'+'+intl($('#cp').value):'';
-const{error}=await sb.from('sp_settings').upsert([{key:'whatsapp',value:w},{key:'phone',value:ph}]);
-if(error)return alert('تعذر الحفظ. تأكد من تشغيل ملف SQL الخاص بالإعدادات.');SET={whatsapp:w,phone:ph};$('#dcfg').close();alert('تم حفظ الإعدادات')};
+const u=$('#lgu').value.trim();if(u&&!(/^https:/i.test(u)&&okLogo(u)))return alert('رابط الشعار غير صالح، يجب أن يبدأ بـ https://');if(u)LOGO=u;const{error}=await sb.from('sp_settings').upsert([{key:'whatsapp',value:w},{key:'phone',value:ph},{key:'logo',value:LOGO}]);
+if(error)return alert('تعذر الحفظ. تأكد من تشغيل ملف SQL الخاص بالإعدادات.');SET={whatsapp:w,phone:ph,logo:LOGO};hdrLogo();$('#dcfg').close();alert('تم حفظ الإعدادات')};
 init();
 </script></body></html>
